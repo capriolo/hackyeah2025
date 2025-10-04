@@ -5,7 +5,7 @@ webapp_install: $(WEBAPP_DIR)/package.json
 	cd $(WEBAPP_DIR) && \
 		npm install
 
-webapp_run: webapp_install
+webapp_run:
 	cd $(WEBAPP_DIR) && \
 		npm run dev
 
