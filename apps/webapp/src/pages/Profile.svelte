@@ -1,7 +1,8 @@
 <script>
     import Navbar from "../components/Navbar.svelte";
-    import { profile } from "../shared";
+    import { profile, enableNotifications } from "../shared";
 	import { link } from "svelte5-router";
+    import { subscribeNotifications } from '../api'
 
     let profileData = $state({
         name: "",
@@ -74,6 +75,11 @@
                 <div class="form-group">
                     <label for="calendarUrl" class="form-label">Link do kalendarza (iCal)</label>
                     <input type="text" id="calendarUrl" class="form-control" placeholder="Link do kalendarza (iCal)" bind:value={profileData.calendarUrl}>
+                </div>
+
+                <div class="form-group">
+                    <label for="notifications" class="form-label">Powiadomienia</label>
+                    <button type="button" onclick={enableNotifications} class="button button-primary">Włącz powiadomienia</button>
                 </div>
 
                 <div class="form-actions">

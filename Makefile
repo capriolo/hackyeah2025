@@ -16,4 +16,4 @@ webapp_build: $(WEBAPP_DIR)/**/* webapp_install
 
 core_run:
 	cd $(CORE_DIR) && \
-		go run -race cmd/main.go
+		ENV_PATH=../../.env go run -race cmd/main.go
