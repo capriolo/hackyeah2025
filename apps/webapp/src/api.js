@@ -8,6 +8,42 @@ export const subscribeNotifications = async (sub) => {
     return Promise.resolve(res)
 }
 
+export const saveProfile = async (data) => {
+    const res = await _post('/api/v1/profile', data)
+    if (!res.ok) {
+        return Promise.reject('err' in res ? res.err : 'err')
+    }
+    
+    return Promise.resolve(res)
+}
+
+export const garminSync = async (data) => {
+    const res = await _post('/api/v1/sync/garmin', data)
+    if (!res.ok) {
+        return Promise.reject('err' in res ? res.err : 'err')
+    }
+    
+    return Promise.resolve(res)
+}
+
+export const icalSync = async (data) => {
+    const res = await _post('/api/v1/sync/ical', data)
+    if (!res.ok) {
+        return Promise.reject('err' in res ? res.err : 'err')
+    }
+    
+    return Promise.resolve(res)
+}
+
+export const getProfile = async () => {
+    const res = await _get('/api/v1/profile')
+    if (!res.ok) {
+        return Promise.reject('err' in res ? res.err : 'err')
+    }
+    
+    return res.json()
+}
+
 export const getDayPlan = async () => {
     const res = await _get('/api/v1/day')
     if (!res.ok) {

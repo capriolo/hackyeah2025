@@ -1,55 +1,51 @@
 package day
 
-type Event struct {
-	Type        string `json:"type"`
-	Title       string `json:"title"`
-	Description string `json:"description,omitempty"`
-	Start       uint16 `json:"start"`
-	Duration    uint16 `json:"duration"`
-}
+import (
+	"fmt"
+	"time"
+
+	"github.com/capriolo/hackyeah2025/core/internal/store"
+)
 
 type DayRes struct {
-	Date        string  `json:"date"`
-	Description string  `json:"description"`
-	Events      []Event `json:"events"`
-	Suggestions []Event `json:"suggestions"`
-	WakeupTime  uint16  `json:"wakeupTime,omitempty"`
-	SleepTime   uint16  `json:"sleepTime,omitempty"`
+	Date        string         `json:"date"`
+	Description string         `json:"description"`
+	Events      []*store.Event `json:"events"`
+	Suggestions []*store.Event `json:"suggestions"`
+	WakeupTime  uint16         `json:"wakeupTime,omitempty"`
+	SleepTime   uint16         `json:"sleepTime,omitempty"`
 }
 
-func Day(date string) DayRes {
+func Day(user *store.User, dateStr string) DayRes {
+
+	today := time.Now()
+
+	if dateStr == "" {
+		dateStr = today.Format("20060102")
+	}
+
+	date, err := time.Parse("20060102", dateStr)
+
+	if date.Before(today) || date.Equal(today) {
+		fmt.Print("grab sleep data")
+	}
+
+	if err != nil {
+		panic(err)
+	}
+
+	var events []*store.Event
+
+	for _, e := range user.CalendarEvents {
+		if dateStr == e.Date {
+			events = append(events, e)
+		}
+	}
+
 	return DayRes{
 		Description: "Sen nie był najlepszy, a kalendarz wygląda napięcie. Rozważ krótki 20-minutowy power nap po lunchu — poprawi koncentrację bardziej niż kolejna kawa.",
-		Events: []Event{
-			{
-				Type:        "gym",
-				Title:       "Siłownia",
-				Description: "Trening klatki i tricepsów",
-				Start:       330,
-				Duration:    100,
-			},
-			{
-				Type:        "work",
-				Title:       "Programowanie",
-				Description: "Praca nad frontendem aplikacji na hackYeah",
-				Start:       480,
-				Duration:    100,
-			},
-			{
-				Type:     "travel",
-				Title:    "Droga do pracy",
-				Start:    420,
-				Duration: 50,
-			},
-			{
-				Type:        "meeting",
-				Title:       "Spotkanie z Michałem",
-				Description: "Plan nowego projektu. Pamiętaj aby zabrać laptopa",
-				Start:       700,
-				Duration:    240,
-			},
-		},
-		Suggestions: []Event{
+		Events:      events,
+		Suggestions: []*store.Event{
 			{
 				Type:        "coffee",
 				Title:       "Kawa",

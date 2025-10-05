@@ -1,15 +1,10 @@
 <script>
   import { link, navigate } from "svelte5-router";
   import { getDayPlan } from "../api"
-  import { profile } from "../shared"
   import Navbar from "../components/Navbar.svelte";
   import Footer from "../components/Footer.svelte";
   import { onMount } from "svelte";
 
-
-  if ($profile.name == "") {
-    navigate("/profile", {replace: true})
-  }
 
   const now = new Date();
   let dayPlan = $state(null)
@@ -18,6 +13,11 @@
 
   onMount(async () => {
     dayPlan = await getDayPlan()
+
+    // console.log("dayPlan", dayPlan)
+    if (!dayPlan?.description) {
+        navigate("/profile", {replace: true})
+    }
 
     setInterval(() => {
 
@@ -72,11 +72,11 @@
       <div class="myday__hour">23:00</div>
 
       {#if dayPlan?.wakeupTime}
-        <div class="myday__wakeup" style="--time: {dayPlan.wakeupTime}; --duration: 10;"><svg><use href="#fa-alarmclock" /></svg></div>
+        <div class="myday__wakeup" style="--time: {dayPlan.wakeupTime};;"><svg><use href="#fa-alarmclock" /></svg></div>
       {/if}
       
       {#if dayPlan?.sleepTime}
-        <div class="myday__sleeptime" style="--time: {dayPlan.sleepTime}; --duration: 10;"><svg><use href="#fa-bed" /></svg></div>
+        <div class="myday__sleeptime" style="--time: {dayPlan.sleepTime};"><svg><use href="#fa-bed" /></svg></div>
       {/if}
 
 
@@ -206,7 +206,7 @@
   .day_description {
     background-color: #ddd;
     padding: 20px;
-    border-radius: 20px;
+    border-radius: 12px;
     margin: 20px 0;
   }
   
@@ -217,9 +217,9 @@
 
     &__hour {
       height: 60px;
-      line-height: 60px;
+      line-height: 30px;
       font-size: 1rem;
-      border-bottom: 1px solid #ccc;
+      border-top: 1px solid #ccc;
     }
 
     &__eventname {
@@ -235,12 +235,28 @@
 
     &__wakeup,
     &__sleeptime {
+      position: absolute;
+      display: flex;
+      align-items: end;
+      background-color: #ddd;
+      border-radius: 0 0 5px 5px;
+      padding: 3px;
+      top: 0;
+      height: calc(var(--time) * 1px);
       margin-left: 50px;
+
       svg {
         height: 24px;
         max-width: 24px;
         fill: #153ac0;
       }
+    }
+    
+    &__sleeptime {
+      align-items: start;
+      border-radius: 5px 5px 0 0;
+      top: calc(var(--time) * 1px);
+      height: calc((1440 - var(--time)) * 1px) !important;
     }
 
     &__now {
@@ -257,8 +273,8 @@
       background-color: #ccc;
       border-radius: 10px;
       padding: 10px;
-      display: flex;
-      flex-direction: row;
+      // display: flex;
+      // flex-direction: row;
       width: calc(100% - 100px);
       opacity: 0.95;
 
@@ -269,14 +285,54 @@
 
 
     &__suggestion {
-      margin-left: 55px;
-      width: calc(100% - 55px);
+      width: 0;
+      height: 0;
+      padding: 5px 20px;
+      visibility: hidden;
+      z-index: 10;
+      margin-left: 70px;
       background-color: #1b09bd;
-      padding: 4px;
       min-height: 30px;
+      position: relative;
+
+      .myday__eventname {
+        color: #fff;
+      }
+
+      &:hover {
+        z-index: 11;
+        height: auto;
+        width: calc(100% - 80px);
+        visibility: visible;
+      }
+      
+      &.active {
+        height: auto;
+        width: calc(100% - 80px);
+      }
+
+      .myday__icon {
+        visibility: visible;
+        position: absolute;
+        top: -20px;
+        left: -20px;
+        border-radius: 8px;
+        background-color: #1b09bd;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+
+        svg {
+          max-width: 24px;
+          max-height: 24px;
+          fill: #fff;
+        }
+      }
     }
 
-    &__wakeup,
     &__sleeptime,
     &__now,
     &__suggestion,

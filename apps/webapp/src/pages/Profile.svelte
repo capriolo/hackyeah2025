@@ -1,19 +1,37 @@
 <script>
     import Navbar from "../components/Navbar.svelte";
-    import { profile, enableNotifications } from "../shared";
+    import { toggleNotifications, hasNotificationsEnabled as hasNotificationsEnabledCall } from "../shared";
 	import { link } from "svelte5-router";
-    import { subscribeNotifications } from '../api'
+    import { getProfile, saveProfile as saveProfileApiCall, garminSync as garminSyncApiCall, icalSync as icalSyncApiCall } from '../api'
+    import { onMount } from "svelte";
 
     let profileData = $state({
         name: "",
-        calendarUrl: "",
-        ...$profile
+        calGoogle: false,
+        garmin: false,
+    })
+    
+    const saveProfile = async (e) => {
+        e.preventDefault()
+
+        await saveProfileApiCall(profileData)
+    }
+
+    let hasNotificationsEnabled = $state(true)
+
+    onMount(async () => {
+        hasNotificationsEnabled = await hasNotificationsEnabledCall()
+        profileData = await getProfile()
+
+        console.log("profileData", profileData)
     })
 
-    const saveProfile = (e) => {
-        console.log('saveProfile', profileData)
+    const garminSync = async () => {
+        await garminSyncApiCall()
+    }
 
-        profile.set(profileData)
+    const googleCalSync = async () => {
+        await icalSyncApiCall()
     }
 
     // let bmr = $derived(10*profileData.weight + 6.25)
@@ -34,8 +52,8 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="name" class="form-label">Imię</label>
-                    <input type="text" id="name" class="form-control" placeholder="Imię" bind:value={profileData.name}>
+                    <label for="name" class="form-label">Nazwa użytkownika</label>
+                    <input type="text" id="name" class="form-control" placeholder="Nazwa użytkownika" bind:value={profileData.name}>
                 </div>
 
                 <!-- <div class="form-group">
@@ -73,13 +91,58 @@
                 </div> -->
 
                 <div class="form-group">
-                    <label for="calendarUrl" class="form-label">Link do kalendarza (iCal)</label>
-                    <input type="text" id="calendarUrl" class="form-control" placeholder="Link do kalendarza (iCal)" bind:value={profileData.calendarUrl}>
+                    <label for="calendarUrl" class="form-label">Zsynchronizuj kalendarz</label>
+
+                    <div class="platforms">
+                        <button type="button" onclick={googleCalSync}>
+                            <img src="/img/cal-google.png" alt="google calendar"/>
+                        </button>
+
+                        <button type="button" onclick={()=>{}}>
+                            <img src="/img/cal-apple.png" alt="apple calendar"/>
+                        </button>
+
+                        <button type="button" onclick={()=>{}}>
+                            <img src="/img/cal-ms.png" alt="microsoft calendar"/>
+                        </button>
+                    </div>
+
+                </div>
+
+                <div class="form-group smartwatch">
+                    <label for="smartwatchSync" class="form-label">Zsynchronizuj smartwatch</label>
+
+                    <div class="platforms">
+                        <button type="button" onclick={garminSync}>
+                            <img src="/img/garminconnect.png" alt="garmin"/>
+                        </button>
+
+                        <button type="button" onclick={()=>{}}>
+                            <img src="/img/fitbit.png" alt="fitbit"/>
+                        </button>
+
+                        <button type="button" onclick={()=>{}}>
+                            <img src="/img/polar.png" alt="polar"/>
+                        </button>
+
+                        <button type="button" onclick={()=>{}}>
+                            <img src="/img/suunto.png" alt="suunto"/>
+                        </button>
+
+                    </div>
+                    <!-- <input type="text" id="calendarUrl" class="form-control" placeholder="Link do kalendarza (iCal)" bind:value={profileData.calendarUrl}> -->
                 </div>
 
                 <div class="form-group">
                     <label for="notifications" class="form-label">Powiadomienia</label>
-                    <button type="button" onclick={enableNotifications} class="button button-primary">Włącz powiadomienia</button>
+                    
+                    <button type="button" onclick={() => {toggleNotifications(); hasNotificationsEnabled = !hasNotificationsEnabled}} class="button button-primary">
+                        {#if hasNotificationsEnabled}
+                            Wyłącz
+                        {:else}
+                            Włącz powiadomienia
+                        {/if}
+                    </button>
                 </div>
 
                 <div class="form-actions">
@@ -98,6 +161,24 @@
 
             h3 {
                 margin-bottom: 16px;
+            }
+
+            .platforms {
+                display: flex;
+                gap: 4px;
+
+                button {
+                    width: 100px;
+                    height: 64px;
+                    cursor: pointer;
+                    background: rgba(0,0,0,0.1);
+                    border: none;
+
+                    img {
+                        max-width: 64px;
+                        max-height: 50px;
+                    }
+                }
             }
         }
     </style>

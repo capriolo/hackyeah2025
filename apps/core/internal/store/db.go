@@ -11,6 +11,8 @@ var mu sync.RWMutex
 func Read() *Data {
 
 	mu.RLock()
+	defer mu.RUnlock()
+
 	dataJSON, err := os.ReadFile(os.Getenv("DB_FILE"))
 	if err != nil {
 		panic(err)
@@ -23,13 +25,12 @@ func Read() *Data {
 		panic(err)
 	}
 
-	mu.RUnlock()
-
 	return data
 }
 
 func Write(d *Data) {
 	mu.Lock()
+	defer mu.Unlock()
 
 	dataJSON, err := json.Marshal(d)
 	if err != nil {
@@ -40,6 +41,4 @@ func Write(d *Data) {
 	if err != nil {
 		panic(err)
 	}
-
-	mu.Unlock()
 }
