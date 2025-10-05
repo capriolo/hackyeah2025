@@ -101,7 +101,7 @@ func timestampToMinutesFromMidnight(timestamp string) (minutesFromMidnight uint1
 		return 0, fmt.Errorf("invalid timestamp format: %v", err)
 	}
 
-	minutesFromMidnight = uint16(t.Hour()*60 + t.Minute())
+	minutesFromMidnight = uint16(t.Hour()*60 + t.Minute() + 120)
 
 	return minutesFromMidnight, nil
 }

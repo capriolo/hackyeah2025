@@ -111,4 +111,23 @@ const unsub = () => {
         })
 }
 
-export { toggleNotifications, hasNotificationsEnabled }
+function addDaysToYYYYMMDD(yyyymmdd, daysToAdd) {
+  // Parsowanie daty z formatu 20240115
+  const year = parseInt(yyyymmdd.slice(0, 4));
+  const month = parseInt(yyyymmdd.slice(4, 6)) - 1; // miesiące 0-11
+  const day = parseInt(yyyymmdd.slice(6, 8));
+  
+  const date = new Date(year, month, day);
+  
+  // Dodanie dni
+  date.setDate(date.getDate() + daysToAdd);
+  
+  // Formatowanie z powrotem do YYYYMMDD
+  const newYear = date.getFullYear();
+  const newMonth = String(date.getMonth() + 1).padStart(2, '0');
+  const newDay = String(date.getDate()).padStart(2, '0');
+  
+  return `${newYear}${newMonth}${newDay}`;
+}
+
+export { toggleNotifications, hasNotificationsEnabled, addDaysToYYYYMMDD }

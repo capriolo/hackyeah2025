@@ -1,23 +1,31 @@
 <script>
   import { link, navigate } from "svelte5-router";
   import { getDayPlan } from "../api"
+  import { addDaysToYYYYMMDD } from "../shared"
   import Navbar from "../components/Navbar.svelte";
   import Footer from "../components/Footer.svelte";
   import { onMount } from "svelte";
-
+  import SleepChart from "../components/SleepChart.svelte";
 
   const now = new Date();
-  let dayPlan = $state(null)
+
+  let dayPlan = $state()
+  let reloadChart = $state()
   let currTime = $state((now.getHours() * 60) + now.getMinutes())
 
+  let date = $state(window.location.hash.substring(1))
+
+  if (date == '') {
+    date = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`
+    window.location.hash = `#${date}`
+  }
 
   onMount(async () => {
-    dayPlan = await getDayPlan()
-
-    // console.log("dayPlan", dayPlan)
-    if (!dayPlan?.description) {
-        navigate("/profile", {replace: true})
-    }
+    await loadDay(date)
+    console.log("dayPlan", dayPlan)
+    // if (!dayPlan?.description) {
+    //     navigate("/profile", {replace: true})
+    // }
 
     setInterval(() => {
 
@@ -25,6 +33,14 @@
     }, 5000)
   })
 
+  const loadDay = async (d) => {
+    console.log("load", date)
+    date = d
+    window.location.hash = `#${d}`
+
+    dayPlan = await getDayPlan(d)
+    
+  }
 
   const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -32,6 +48,13 @@
   const dayName = days[now.getDay()];
   const monthName = months[now.getMonth()];
 
+const prevDay = async () => {
+  await loadDay(addDaysToYYYYMMDD(date, -1))
+}
+
+const nextDay = async () => {
+  await loadDay(addDaysToYYYYMMDD(date, 1))
+}
 </script>
 
 <Navbar/>
@@ -39,13 +62,25 @@
 <main class="container">
   <!-- {JSON.stringify($profile)} -->
   
-  <h2>{`${dayName}, ${monthName} ${now.getDate()}, ${now.getFullYear()} ${now.getHours()}:${now.getMinutes()}`}</h2>
+  <div class="header">
+    <div class="date">
+      <h2>{`${dayName}, ${monthName} ${now.getDate()}, ${now.getFullYear()} ${now.getHours()}:${now.getMinutes()}`}</h2>
 
-  <div class="day_description">
-    {dayPlan?.description}
+      <div class="day_description">
+        {dayPlan?.description}
+      </div>
+
+    </div>
+    <div class="chart">
+      {#if dayPlan?.sleepData?.duration}
+        <SleepChart sleepData={dayPlan?.sleepData} bind:reload={reloadChart}/>
+      {/if}
+    </div>
   </div>
 
   <div class="myday">
+      <button type="button" onclick={prevDay} class="myday__navback">b</button>
+      <button type="button" onclick={nextDay} class="myday__navnext">n</button>
       <div class="myday__hour">00:00</div>
       <div class="myday__hour">01:00</div>
       <div class="myday__hour">02:00</div>
@@ -134,8 +169,11 @@
           <div class="myday__eventdescription">
             {suggestion.description}
           </div>
-        </div>
 
+          {#if suggestion.type == "food"}
+            <a class="myday__action button button-secondary" use:link href="/order">Zamów</a>
+          {/if}
+        </div>
       {/each}
 
   </div>
@@ -203,8 +241,22 @@
     margin-top: 60px;
   }
 
+  .header {
+    display: flex;
+    flex-direction: row;
+
+    .date {
+      flex-grow: 1;
+    }
+
+    .chart {
+
+    }
+  }
+
   .day_description {
     background-color: #ddd;
+    width: 80%;
     padding: 20px;
     border-radius: 12px;
     margin: 20px 0;
@@ -213,9 +265,36 @@
   .myday {
     position: relative;
 
-    
+
+    &__navback,
+    &__navnext {
+      cursor: pointer;
+      border: none;
+      position: absolute;
+      width: 20px;
+      height: 100%;
+      background-color: rgba($color: #fff, $alpha: 0.02);
+      top: 0;
+      left: 0;
+
+      &:hover {
+        background-color: rgba($color: #fff, $alpha: 0.05);
+      }
+    }
+
+    &__action {
+      position: absolute;
+      right: 20px;
+      top: 5px;
+    }
+
+    &__navnext {
+      left: auto;
+      right: 0;
+    }
 
     &__hour {
+      margin: 0 22px;
       height: 60px;
       line-height: 30px;
       font-size: 1rem;

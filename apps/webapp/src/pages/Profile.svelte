@@ -22,23 +22,26 @@
     onMount(async () => {
         hasNotificationsEnabled = await hasNotificationsEnabledCall()
         profileData = await getProfile()
-
-        console.log("profileData", profileData)
     })
 
-    const garminSync = async () => {
+    const garminSync = async (e) => {
+
+        const button = e.currentTarget;
+        button.classList.add('loading');
+
         await garminSyncApiCall()
+
+        button.classList.remove('loading');
     }
 
-    const googleCalSync = async () => {
+    const googleCalSync = async (e) => {
+        const button = e.currentTarget;
+        button.classList.add('loading');
+
         await icalSyncApiCall()
+
+        button.classList.remove('loading');
     }
-
-    // let bmr = $derived(10*profileData.weight + 6.25)
-    // BMR = 10 × masa(kg) + 6.25 × wzrost(cm) – 5 × wiek(lata) + 5
-    // Kobiety:
-    // BMR = 10 × masa(kg) + 6.25 × wzrost(cm) – 5 × wiek(lata) – 161
-
 </script>
 
 <Navbar/>
@@ -55,40 +58,6 @@
                     <label for="name" class="form-label">Nazwa użytkownika</label>
                     <input type="text" id="name" class="form-control" placeholder="Nazwa użytkownika" bind:value={profileData.name}>
                 </div>
-
-                <!-- <div class="form-group">
-                    <label for="birthYear" class="form-label">Rok urodzenia</label>
-                    <input type="number" id="birthYear" class="form-control" placeholder="Wiek" bind:value={profileData.birthYear}>
-                </div>
-
-                <div class="form-group">
-                    <label for="name" class="form-label">Płeć</label>
-                    <input type="radio" id="name" class="form-control" value="female" bind:group={profileData.gender}> Kobieta
-                    <input type="radio" id="name" class="form-control" value="male" bind:group={profileData.gender}> Mężczyzna
-                </div> -->
-
-                <!-- <div class="form-group">
-                    <label for="weight" class="form-label">Masa ciała [kg]</label>
-                    <input type="text" id="weight" class="form-control" placeholder="Masa ciała" bind:value={profileData.weight}>
-                </div>
-
-                <div class="form-group">
-                    <label for="pal" class="form-label">Poziom aktywności</label> -->
-
-                    <!-- Poziom aktywności	Opis	Współczynnik
-                    1.2	Siedzący tryb życia (mało ruchu, praca biurowa)	1.2
-                    1.375	Lekka aktywność (ćwiczenia 1–3×/tydz.)	1.375
-                    1.55	Średnia aktywność (ćwiczenia 3–5×/tydz.)	1.55
-                    1.725	Wysoka aktywność (ćwiczenia 6–7×/tydz.)	1.725
-                    1.9	Bardzo wysoka aktywność (ciężka praca fizyczna, sport zawodowy)	1.9 -->
-
-                    <!-- <input type="range" min="1.2" max="1.9" step="0.05" id="pal" class="form-control" bind:value={profileData.pal}>
-                </div>
-            
-                <div class="form-group">
-                    <label for="tdee" class="form-label">Zapotrzebowanie kaloryczne</label>
-                    <input type="date" id="tdee" class="form-control" placeholder="Wiek" bind:value={profileData.tdee}>
-                </div> -->
 
                 <div class="form-group">
                     <label for="calendarUrl" class="form-label">Zsynchronizuj kalendarz</label>
@@ -130,7 +99,6 @@
                         </button>
 
                     </div>
-                    <!-- <input type="text" id="calendarUrl" class="form-control" placeholder="Link do kalendarza (iCal)" bind:value={profileData.calendarUrl}> -->
                 </div>
 
                 <div class="form-group">
@@ -173,10 +141,24 @@
                     cursor: pointer;
                     background: rgba(0,0,0,0.1);
                     border: none;
+                    position: relative;
 
                     img {
                         max-width: 64px;
                         max-height: 50px;
+                    }
+                }
+                :global(button.loading) {
+
+                    &:after {
+                        position: absolute;
+                        display: block;
+                        top: 0;
+                        left: 0;
+                        content: '...';
+                        width: 100px;
+                        height: 64px;
+                        background-color: rgba(#fff, 0.6);
                     }
                 }
             }

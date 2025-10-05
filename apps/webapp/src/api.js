@@ -44,8 +44,9 @@ export const getProfile = async () => {
     return res.json()
 }
 
-export const getDayPlan = async () => {
-    const res = await _get('/api/v1/day')
+
+export const getDayPlan = async (date) => {
+    const res = await _get(`/api/v1/day?date=${date}`)
     if (!res.ok) {
         return Promise.reject('err' in res ? res.err : 'err')
     }

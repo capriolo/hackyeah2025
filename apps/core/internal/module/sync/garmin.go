@@ -29,7 +29,7 @@ func GetData() []*store.SleepData {
 
 	allData := []*store.SleepData{}
 
-	page := uint16(7)
+	page := uint16(1)
 	for {
 		sleepData := runalyzeCall(page)
 
@@ -37,7 +37,10 @@ func GetData() []*store.SleepData {
 			break
 		}
 
-		limit, _ := time.Parse("20060102", "20251010")
+		if page >= 6 {
+			break
+		}
+		limit, _ := time.Parse("20060102", "20251001")
 
 		for _, entry := range sleepData {
 			d, _ := time.Parse("20060102", entry.DateTime)
@@ -120,8 +123,8 @@ type runalyzeSleepData struct {
 	Id                 int    `json:"id"`
 	DateTime           string `json:"date_time"`
 	Duration           uint16 `json:"duration"`
-	RemDuration        uint16 `json:"remDuration"`
-	LightSleepDuration uint16 `json:"lightSleepDuration"`
-	DeepSleepDuration  uint16 `json:"deepSleepDuration"`
-	AwakeDuration      uint16 `json:"awakeDuration"`
+	RemDuration        uint16 `json:"rem_duration"`
+	LightSleepDuration uint16 `json:"light_sleep_duration"`
+	DeepSleepDuration  uint16 `json:"deep_sleep_duration"`
+	AwakeDuration      uint16 `json:"awake_duration"`
 }
