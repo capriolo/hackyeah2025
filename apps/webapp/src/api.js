@@ -8,6 +8,15 @@ export const subscribeNotifications = async (sub) => {
     return Promise.resolve(res)
 }
 
+export const getDayPlan = async () => {
+    const res = await _get('/api/v1/day')
+    if (!res.ok) {
+        return Promise.reject('err' in res ? res.err : 'err')
+    }
+    
+    return res.json()
+}
+
 const _get = async (endpoint) => {
     if (import.meta.env.SSR) {
         return Promise.resolve(Response.json({}))

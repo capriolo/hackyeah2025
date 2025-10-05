@@ -2,8 +2,11 @@ package static
 
 import (
 	"embed"
+	"errors"
+	"fmt"
 	"io/fs"
 	"net/http"
+	"strings"
 )
 
 //go:embed webapp/*
@@ -15,7 +18,25 @@ func Serve(mux *http.ServeMux) {
 		panic(err)
 	}
 
-	fileServer := http.FileServer(http.FS(webappFS))
+	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
+		filepath := fmt.Sprintf("webapp%s", r.RequestURI)
+		if r.RequestURI != "/" && !strings.HasPrefix(r.RequestURI, "/api") && !fileExists(filepath) {
+			content, _ := static.ReadFile("webapp/index.html")
+			w.Header().Set("Content-Type", "text/html")
+			w.Write([]byte(content))
+			return
+		}
 
-	mux.Handle("GET /", fileServer)
+		http.FileServer(http.FS(webappFS)).ServeHTTP(w, r)
+	})
+}
+
+func fileExists(filename string) bool {
+	_, err := static.Open(filename)
+	if err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			return false
+		}
+	}
+	return true
 }
